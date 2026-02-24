@@ -337,7 +337,6 @@
     </div>
 
     <div class="grid">
-      <!-- LEFT -->
       <div class="card">
         <div class="card-header">
           <div>
@@ -396,7 +395,6 @@
         </div>
       </div>
 
-      <!-- RIGHT -->
       <div class="card">
         <div class="card-header">
           <div>
@@ -536,13 +534,13 @@
   function startProgress(){
     progress.style.display = 'block';
     bar.style.width = '10%';
-    // حركة بسيطة (ليست تقدم حقيقي)
     let p = 10;
     bar._int = setInterval(()=>{
       p = Math.min(92, p + Math.random()*10);
       bar.style.width = p.toFixed(0) + '%';
     }, 250);
   }
+  
   function stopProgress(ok=true){
     clearInterval(bar._int);
     bar.style.width = ok ? '100%' : '0%';
@@ -606,6 +604,9 @@
       downloadHtmlBtn.disabled = false;
 
       toast('تم الرفع ✅');
+      
+      // لتفعيل النسخ التلقائي للرابط المباشر، قم بإزالة علامة التعليق (//) من السطر التالي:
+      // copyText(lastDirectUrl); 
 
       stopProgress(true);
     }catch(e){
@@ -641,7 +642,10 @@
   // Events: file picker
   fileInput.addEventListener('change', () => {
     const f = fileInput.files && fileInput.files[0];
-    if(f) setSelectedFile(f);
+    if(f){
+      setSelectedFile(f);
+      upload(); // ← يبدأ الرفع تلقائياً
+    }
   });
 
   // Events: drag & drop
@@ -664,14 +668,14 @@
     const f = e.dataTransfer.files && e.dataTransfer.files[0];
     if(f && f.type && f.type.startsWith('image/')){
       setSelectedFile(f);
-      toast('تم اختيار الصورة');
+      toast('تم اختيار الصورة وجاري الرفع...');
+      upload(); // ← رفع تلقائي
     }else{
       toast('اسحب ملف صورة فقط');
     }
   });
 
   // Events: paste (Ctrl+V / Cmd+V)
-  // نلتقط paste على الصفحة كلها + داخل منطقة الرفع
   function handlePaste(e){
     const items = e.clipboardData && e.clipboardData.items;
     if(!items) return;
@@ -680,10 +684,10 @@
       if(item.type && item.type.startsWith('image/')){
         const blob = item.getAsFile();
         if(blob){
-          // اعط اسم افتراضي
           const file = new File([blob], 'pasted-image.png', { type: blob.type || 'image/png' });
           setSelectedFile(file);
-          toast('تم لصق الصورة');
+          toast('تم لصق الصورة وجاري الرفع...');
+          upload(); // ← رفع تلقائي
           e.preventDefault();
           return;
         }

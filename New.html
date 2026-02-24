@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>رفع صورة + توليد HTML</title>
+  <style>
+    body {
+      font-family: system-ui;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+      background: #f5f5f5;
+    }
+    .box {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    input, button, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    textarea {
+      height: 200px;
+      direction: ltr;
+    }
+    button {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h2>رفع صورة والحصول على رابط مباشر + HTML</h2>
+
+<div class="box">
+  <input type="file" id="file" accept="image/*">
+  <button onclick="upload()">رفع الصورة</button>
+</div>
+
+<div class="box">
+  <label>الرابط المباشر:</label>
+  <input id="url" readonly>
+</div>
+
+<div class="box">
+  <label>كود HTML كامل:</label>
+  <textarea id="html" readonly></textarea>
+</div>
+
+<script>
+const API_KEY = "659f11c9ce462ad799f67a4bab2e75e1";
+
+function toBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = ()=> resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+  });
+}
+
+async function upload(){
+
+  const file = document.getElementById("file").files[0];
+  if(!file){
+    alert("اختر صورة");
+    return;
+  }
+
+  const base64 = await toBase64(file);
+
+  const form = new FormData();
+  form.append("image", base64);
+
+  const res = await fetch(
+    "https://api.imgbb.com/1/upload?key=" + API_KEY,
+    {
+      method: "POST",
+      body: form
+    }
+  );
+
+  const json = await res.json();
+
+  if(!json.success){
+    alert("فشل الرفع");
+    return;
+  }
+
+  const direct = json.data.image.url;
+
+  document.getElementById("url").value = direct;
+
+  const html =
+`<!doctype html>
+<html>
+<body>
+<img src="${direct}">
+</body>
+</html>`;
+
+  document.getElementById("html").value = html;
+}
+</script>
+
+</body>
+</html>

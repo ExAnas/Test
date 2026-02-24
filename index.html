@@ -474,7 +474,7 @@
     toastEl.textContent = msg;
     toastEl.style.display = 'block';
     clearTimeout(toastEl._t);
-    toastEl._t = setTimeout(()=> toastEl.style.display = 'none', 2200);
+    toastEl._t = setTimeout(()=> toastEl.style.display = 'none', 2500);
   }
 
   function formatBytes(bytes){
@@ -547,6 +547,13 @@
     setTimeout(()=>{ progress.style.display='none'; bar.style.width='0%'; }, 600);
   }
 
+  // Copy with custom message
+  async function copyText(text, msg = 'تم النسخ ✅'){
+    if(!text) return;
+    await navigator.clipboard.writeText(text);
+    toast(msg);
+  }
+
   async function upload(){
     if(!currentFile){
       toast('اختر/الصق صورة أولاً');
@@ -579,21 +586,19 @@
       lastDirectUrl = direct;
       directUrlEl.value = direct;
 
-      // full html
+      // full html (صورة فقط وبحجمها الطبيعي بدون أي تعديلات)
       lastHtml = `<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>صورة مرفوعة</title>
+  <title>صورة</title>
   <style>
-    body{font-family:system-ui; padding:24px; background:#0b1020; color:#fff;}
-    img{max-width:100%; height:auto; border-radius:16px; border:1px solid rgba(255,255,255,.18);}
+    body { margin: 0; padding: 0; background: #0b1020; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
   </style>
 </head>
 <body>
-  <h1>الصورة</h1>
-  <img src="${direct}" alt="Uploaded image" />
+  <img src="${direct}" alt="صورة مرفوعة" />
 </body>
 </html>`;
       htmlCodeEl.value = lastHtml;
@@ -603,12 +608,11 @@
       openDirectBtn.disabled = false;
       downloadHtmlBtn.disabled = false;
 
-      toast('تم الرفع ✅');
-      
-      // لتفعيل النسخ التلقائي للرابط المباشر، قم بإزالة علامة التعليق (//) من السطر التالي:
-      // copyText(lastDirectUrl); 
-
       stopProgress(true);
+
+      // نسخ كود الـ HTML تلقائياً
+      await copyText(lastHtml, 'تم الرفع ونسخ كود HTML تلقائياً ✅');
+
     }catch(e){
       stopProgress(false);
       toast('خطأ: ' + (e.message || 'غير معروف'));
@@ -616,13 +620,6 @@
       uploadBtn.textContent = '⬆️ رفع وتوليد';
       uploadBtn.disabled = !currentFile;
     }
-  }
-
-  // Copy
-  async function copyText(text){
-    if(!text) return;
-    await navigator.clipboard.writeText(text);
-    toast('تم النسخ ✅');
   }
 
   // Download html
@@ -644,7 +641,7 @@
     const f = fileInput.files && fileInput.files[0];
     if(f){
       setSelectedFile(f);
-      upload(); // ← يبدأ الرفع تلقائياً
+      upload(); 
     }
   });
 
@@ -669,7 +666,7 @@
     if(f && f.type && f.type.startsWith('image/')){
       setSelectedFile(f);
       toast('تم اختيار الصورة وجاري الرفع...');
-      upload(); // ← رفع تلقائي
+      upload(); 
     }else{
       toast('اسحب ملف صورة فقط');
     }
@@ -687,7 +684,7 @@
           const file = new File([blob], 'pasted-image.png', { type: blob.type || 'image/png' });
           setSelectedFile(file);
           toast('تم لصق الصورة وجاري الرفع...');
-          upload(); // ← رفع تلقائي
+          upload(); 
           e.preventDefault();
           return;
         }

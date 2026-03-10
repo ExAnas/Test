@@ -385,6 +385,7 @@
             </div>
             <div class="actions">
               <button class="btn good" id="copyDirectBtn" disabled>🔗 نسخ الرابط</button>
+              <button class="btn good" id="copyImgTagBtn" disabled>🖼️ نسخ img</button>
               <button class="btn good" id="copyHtmlBtn" disabled>📄 نسخ HTML</button>
               <button class="btn good" id="copyHtmlReturnBtn" disabled>📝 نسخ HTML + ارجع</button>
             </div>
@@ -458,6 +459,7 @@
   const htmlCodeEl = document.getElementById('htmlCode');
 
   const copyDirectBtn = document.getElementById('copyDirectBtn');
+  const copyImgTagBtn = document.getElementById('copyImgTagBtn');
   const copyHtmlBtn = document.getElementById('copyHtmlBtn');
   const copyHtmlReturnBtn = document.getElementById('copyHtmlReturnBtn');
   const openDirectBtn = document.getElementById('openDirectBtn');
@@ -470,6 +472,7 @@
 
   let currentFile = null;
   let lastDirectUrl = '';
+  let lastImgTag = '';
   let lastHtml = '';
   let lastHtmlWithReturn = '';
 
@@ -516,9 +519,11 @@
     directUrlEl.value = '';
     htmlCodeEl.value = '';
     lastDirectUrl = '';
+    lastImgTag = '';
     lastHtml = '';
     lastHtmlWithReturn = '';
     copyDirectBtn.disabled = true;
+    copyImgTagBtn.disabled = true;
     copyHtmlBtn.disabled = true;
     copyHtmlReturnBtn.disabled = true;
     openDirectBtn.disabled = true;
@@ -585,6 +590,7 @@
 
       const direct = data.data.image.url;
       lastDirectUrl = direct;
+      lastImgTag = `<img src="${direct}" alt="صورة مرفوعة" />`;
       directUrlEl.value = direct;
 
       lastHtml = `<!doctype html>
@@ -652,6 +658,7 @@
       htmlCodeEl.value = lastHtml;
 
       copyDirectBtn.disabled = false;
+      copyImgTagBtn.disabled = false;
       copyHtmlBtn.disabled = false;
       copyHtmlReturnBtn.disabled = false;
       openDirectBtn.disabled = false;
@@ -742,6 +749,7 @@
 
   uploadBtn.addEventListener('click', upload);
   copyDirectBtn.addEventListener('click', ()=> copyText(lastDirectUrl));
+  copyImgTagBtn.addEventListener('click', ()=> copyText(lastImgTag, 'تم نسخ وسم img ✅'));
   copyHtmlBtn.addEventListener('click', ()=> copyText(lastHtml, 'تم نسخ HTML العادي ✅'));
   copyHtmlReturnBtn.addEventListener('click', ()=> copyText(lastHtmlWithReturn, 'تم نسخ HTML مع كلمة ارجع ✅'));
   openDirectBtn.addEventListener('click', ()=>{
@@ -755,9 +763,11 @@
     directUrlEl.value = '';
     htmlCodeEl.value = '';
     lastDirectUrl = '';
+    lastImgTag = '';
     lastHtml = '';
     lastHtmlWithReturn = '';
     copyDirectBtn.disabled = true;
+    copyImgTagBtn.disabled = true;
     copyHtmlBtn.disabled = true;
     copyHtmlReturnBtn.disabled = true;
     openDirectBtn.disabled = true;

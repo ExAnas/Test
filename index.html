@@ -321,6 +321,14 @@
       text-decoration: none;
       border-bottom: 1px dashed rgba(56,189,248,.35);
     }
+
+    .version{
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      opacity: .9;
+    }
   </style>
 </head>
 <body>
@@ -386,8 +394,8 @@
             <div class="actions">
               <button class="btn good" id="copyDirectBtn" disabled>🔗 نسخ الرابط</button>
               <button class="btn good" id="copyImgTagBtn" disabled>🖼️ نسخ img</button>
+              <button class="btn good" id="copyImgReturnBtn" disabled>↩️ نسخ img + ارجع</button>
               <button class="btn good" id="copyHtmlBtn" disabled>📄 نسخ HTML</button>
-              <button class="btn good" id="copyHtmlReturnBtn" disabled>📝 نسخ HTML + ارجع</button>
             </div>
           </div>
 
@@ -437,6 +445,8 @@
     <small style="color:var(--muted); display:block; text-align:center;">
       اختصار لصق الصورة: <span class="mono">Ctrl+V</span> / <span class="mono">Cmd+V</span> داخل مربع الرفع.
     </small>
+
+    <div class="version">v1.5</div>
   </div>
 
   <div class="toast"><div id="toast"></div></div>
@@ -460,8 +470,8 @@
 
   const copyDirectBtn = document.getElementById('copyDirectBtn');
   const copyImgTagBtn = document.getElementById('copyImgTagBtn');
+  const copyImgReturnBtn = document.getElementById('copyImgReturnBtn');
   const copyHtmlBtn = document.getElementById('copyHtmlBtn');
-  const copyHtmlReturnBtn = document.getElementById('copyHtmlReturnBtn');
   const openDirectBtn = document.getElementById('openDirectBtn');
   const downloadHtmlBtn = document.getElementById('downloadHtmlBtn');
 
@@ -473,8 +483,8 @@
   let currentFile = null;
   let lastDirectUrl = '';
   let lastImgTag = '';
+  let lastImgWithReturn = '';
   let lastHtml = '';
-  let lastHtmlWithReturn = '';
 
   function toast(msg){
     toastEl.textContent = msg;
@@ -520,12 +530,12 @@
     htmlCodeEl.value = '';
     lastDirectUrl = '';
     lastImgTag = '';
+    lastImgWithReturn = '';
     lastHtml = '';
-    lastHtmlWithReturn = '';
     copyDirectBtn.disabled = true;
     copyImgTagBtn.disabled = true;
+    copyImgReturnBtn.disabled = true;
     copyHtmlBtn.disabled = true;
-    copyHtmlReturnBtn.disabled = true;
     openDirectBtn.disabled = true;
     downloadHtmlBtn.disabled = true;
   }
@@ -591,6 +601,7 @@
       const direct = data.data.image.url;
       lastDirectUrl = direct;
       lastImgTag = `<img src="${direct}" alt="صورة مرفوعة" />`;
+      lastImgWithReturn = `<img src="${direct}" alt="صورة مرفوعة" />\n<div>ارجع</div>`;
       directUrlEl.value = direct;
 
       lastHtml = `<!doctype html>
@@ -616,57 +627,18 @@
 </body>
 </html>`;
 
-      lastHtmlWithReturn = `<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>صورة</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      background: #0b1020;
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Kufi Arabic", sans-serif;
-    }
-
-    .wrap {
-      text-align: center;
-    }
-
-    img {
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin: 0 auto;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <img src="${direct}" alt="صورة مرفوعة" />
-    <div>ارجع</div>
-  </div>
-</body>
-</html>`;
-
       htmlCodeEl.value = lastHtml;
 
       copyDirectBtn.disabled = false;
       copyImgTagBtn.disabled = false;
+      copyImgReturnBtn.disabled = false;
       copyHtmlBtn.disabled = false;
-      copyHtmlReturnBtn.disabled = false;
       openDirectBtn.disabled = false;
       downloadHtmlBtn.disabled = false;
 
       stopProgress(true);
 
-      await copyText(lastHtml, 'تم الرفع ونسخ كود HTML تلقائياً ✅');
+      await copyText(lastImgWithReturn, 'تم الرفع ونسخ img + ارجع تلقائياً ✅');
 
     }catch(e){
       stopProgress(false);
@@ -750,8 +722,8 @@
   uploadBtn.addEventListener('click', upload);
   copyDirectBtn.addEventListener('click', ()=> copyText(lastDirectUrl));
   copyImgTagBtn.addEventListener('click', ()=> copyText(lastImgTag, 'تم نسخ وسم img ✅'));
-  copyHtmlBtn.addEventListener('click', ()=> copyText(lastHtml, 'تم نسخ HTML العادي ✅'));
-  copyHtmlReturnBtn.addEventListener('click', ()=> copyText(lastHtmlWithReturn, 'تم نسخ HTML مع كلمة ارجع ✅'));
+  copyImgReturnBtn.addEventListener('click', ()=> copyText(lastImgWithReturn, 'تم نسخ img + ارجع ✅'));
+  copyHtmlBtn.addEventListener('click', ()=> copyText(lastHtml, 'تم نسخ HTML الكامل ✅'));
   openDirectBtn.addEventListener('click', ()=>{
     if(lastDirectUrl) window.open(lastDirectUrl, '_blank', 'noopener,noreferrer');
   });
@@ -764,12 +736,12 @@
     htmlCodeEl.value = '';
     lastDirectUrl = '';
     lastImgTag = '';
+    lastImgWithReturn = '';
     lastHtml = '';
-    lastHtmlWithReturn = '';
     copyDirectBtn.disabled = true;
     copyImgTagBtn.disabled = true;
+    copyImgReturnBtn.disabled = true;
     copyHtmlBtn.disabled = true;
-    copyHtmlReturnBtn.disabled = true;
     openDirectBtn.disabled = true;
     downloadHtmlBtn.disabled = true;
     toast('تم المسح');

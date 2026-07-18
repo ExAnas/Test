@@ -3,332 +3,607 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AnasUpload — رفع عدة صور ونسخ الأكواد</title>
+  <meta name="theme-color" content="#080b14" />
+  <title>AnasUpload — رفع الصور ونسخ الأكواد</title>
   <style>
     :root{
-      --bg1:#0b1020;
-      --bg2:#070a12;
-      --card:rgba(255,255,255,.06);
-      --card2:rgba(255,255,255,.08);
-      --stroke:rgba(255,255,255,.12);
-      --text:rgba(255,255,255,.92);
-      --muted:rgba(255,255,255,.65);
-      --shadow:0 18px 60px rgba(0,0,0,.35);
+      color-scheme:dark;
+      --bg:#080b14;
+      --bg-soft:#0d1220;
+      --surface:rgba(17,24,39,.72);
+      --surface-strong:rgba(20,28,46,.92);
+      --surface-soft:rgba(255,255,255,.045);
+      --line:rgba(255,255,255,.09);
+      --line-strong:rgba(255,255,255,.16);
+      --text:#f7f8fc;
+      --muted:#98a2b8;
+      --muted-2:#6f7a91;
+      --primary:#7c5cff;
+      --primary-2:#4f8cff;
+      --cyan:#22d3ee;
+      --success:#31d583;
+      --danger:#ff5f77;
+      --warning:#fbbf24;
+      --radius-sm:12px;
       --radius:18px;
-      --success:#22c55e;
-      --danger:#f43f5e;
+      --radius-lg:26px;
+      --shadow:0 24px 80px rgba(0,0,0,.38);
+      --shadow-soft:0 12px 30px rgba(0,0,0,.22);
     }
 
     *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     html,body{min-height:100%}
     body{
       margin:0;
       color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Kufi Arabic",sans-serif;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Tahoma,Arial,"Noto Kufi Arabic",sans-serif;
       background:
-        radial-gradient(1100px 700px at 15% 15%,rgba(124,58,237,.35),transparent 60%),
-        radial-gradient(900px 600px at 85% 20%,rgba(56,189,248,.25),transparent 55%),
-        radial-gradient(900px 700px at 55% 95%,rgba(34,197,94,.18),transparent 55%),
-        linear-gradient(180deg,var(--bg1),var(--bg2));
-      padding:24px;
+        radial-gradient(circle at 12% 8%,rgba(124,92,255,.21),transparent 31rem),
+        radial-gradient(circle at 88% 14%,rgba(34,211,238,.13),transparent 28rem),
+        radial-gradient(circle at 50% 100%,rgba(49,213,131,.08),transparent 34rem),
+        var(--bg);
+      padding:20px;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.28;
+      background-image:
+        linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+      background-size:44px 44px;
+      mask-image:linear-gradient(to bottom,#000,transparent 78%);
+      z-index:-1;
     }
 
     button,input,select,textarea{font:inherit}
-    .wrap{max-width:1120px;margin:0 auto}
-    .topbar{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:18px;
-    }
-    .brand h1{margin:0;font-size:23px}
-    .brand p{margin:7px 0 0;color:var(--muted);font-size:14px;line-height:1.7}
+    button,label,select{touch-action:manipulation}
+    ::selection{background:rgba(124,92,255,.35);color:#fff}
+    :focus-visible{outline:3px solid rgba(79,140,255,.35);outline-offset:3px}
 
-    .card{
-      background:linear-gradient(180deg,var(--card2),var(--card));
-      border:1px solid var(--stroke);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      margin-bottom:16px;
-    }
-    .card-header{
-      padding:16px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    .card-header h2{margin:0;font-size:17px}
-    .card-header small{display:block;margin-top:6px;color:var(--muted);line-height:1.6}
-    .card-body{padding:16px}
+    .app-shell{max-width:1240px;margin:0 auto}
 
-    .drop{
-      min-height:210px;
-      padding:20px;
-      border:1px dashed rgba(255,255,255,.27);
-      border-radius:15px;
-      background:rgba(255,255,255,.03);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      outline:none;
-      transition:.2s ease;
-    }
-    .drop.dragover{
-      border-color:rgba(56,189,248,.85);
-      background:rgba(56,189,248,.09);
-      transform:translateY(-1px);
-    }
-    .drop-inner{
-      width:100%;
+    .app-header{
+      position:sticky;
+      top:12px;
+      z-index:30;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:18px;
-      flex-wrap:wrap;
+      padding:13px 14px 13px 18px;
+      margin-bottom:20px;
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:rgba(8,11,20,.75);
+      box-shadow:0 14px 40px rgba(0,0,0,.24);
+      backdrop-filter:blur(22px) saturate(150%);
+      -webkit-backdrop-filter:blur(22px) saturate(150%);
     }
-    .hint{flex:1 1 420px}
-    .hint .title{margin:0;font-size:16px;font-weight:750}
-    .hint .sub{margin:9px 0 0;color:var(--muted);font-size:13px;line-height:1.7}
 
-    .actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-    .btn{
-      appearance:none;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.06);
-      color:var(--text);
-      padding:10px 12px;
-      border-radius:12px;
-      cursor:pointer;
-      transition:.15s ease;
-      font-weight:700;
-      font-size:13.5px;
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+      background:linear-gradient(145deg,var(--primary),var(--primary-2));
+      box-shadow:0 10px 28px rgba(96,83,255,.36),inset 0 1px 0 rgba(255,255,255,.28);
+    }
+    .brand-mark svg{width:23px;height:23px}
+    .brand-copy{min-width:0}
+    .brand-copy h1{margin:0;font-size:17px;letter-spacing:-.2px}
+    .brand-copy p{margin:3px 0 0;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    .header-actions{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+    .counter-pill{
       display:inline-flex;
       align-items:center;
-      justify-content:center;
       gap:7px;
-      user-select:none;
-      text-decoration:none;
+      min-height:38px;
+      padding:0 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      color:#d8def0;
+      background:var(--surface-soft);
+      font-size:12.5px;
+      font-weight:750;
     }
-    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.1)}
-    .btn:active{transform:none}
-    .btn.primary{border-color:rgba(124,58,237,.6);background:linear-gradient(135deg,rgba(124,58,237,.36),rgba(56,189,248,.19))}
-    .btn.good{border-color:rgba(34,197,94,.55);background:linear-gradient(135deg,rgba(34,197,94,.24),rgba(16,185,129,.14))}
-    .btn.warn{border-color:rgba(244,63,94,.55);background:rgba(244,63,94,.09)}
-    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-    input[type="file"]{display:none}
+    .counter-dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(49,213,131,.1)}
 
-    .settings{
-      margin-top:14px;
+    .hero{
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      grid-template-columns:minmax(0,1.12fr) minmax(300px,.88fr);
+      gap:22px;
+      padding:32px;
+      margin-bottom:20px;
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      background:
+        linear-gradient(125deg,rgba(124,92,255,.13),transparent 42%),
+        linear-gradient(315deg,rgba(34,211,238,.07),transparent 46%),
+        var(--surface);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(20px);
+    }
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:360px;height:360px;
+      left:-160px;top:-210px;
+      border-radius:50%;
+      background:rgba(124,92,255,.18);
+      filter:blur(25px);
+      pointer-events:none;
+    }
+    .hero-copy{position:relative;z-index:1;align-self:center}
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:13px;
+      color:#c8d0e7;
+      font-size:12px;
+      font-weight:750;
+    }
+    .eyebrow span{padding:5px 9px;border:1px solid rgba(124,92,255,.26);border-radius:999px;background:rgba(124,92,255,.1);color:#cabfff}
+    .hero h2{margin:0;max-width:620px;font-size:clamp(27px,4vw,44px);line-height:1.2;letter-spacing:-1.1px}
+    .gradient-text{background:linear-gradient(90deg,#a897ff,#6ea8ff 48%,#58e6d0);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .hero-copy>p{max-width:650px;margin:15px 0 0;color:var(--muted);font-size:14px;line-height:1.9}
+    .feature-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+    .feature-chip{display:inline-flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.035);color:#cbd3e7;font-size:11.5px}
+    .feature-chip svg{width:15px;height:15px;color:#8daeff}
+
+    .upload-panel{
+      position:relative;
+      z-index:1;
+      padding:7px;
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:rgba(5,8,15,.38);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .drop{
+      min-height:300px;
+      padding:24px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1.5px dashed rgba(140,157,194,.34);
+      border-radius:17px;
+      background:
+        radial-gradient(circle at 50% 0,rgba(124,92,255,.13),transparent 55%),
+        rgba(255,255,255,.025);
+      cursor:pointer;
+      transition:border-color .2s ease,background .2s ease,transform .2s ease,box-shadow .2s ease;
+    }
+    .drop:hover{border-color:rgba(124,92,255,.62);background-color:rgba(124,92,255,.04)}
+    .drop.dragover{border-color:var(--cyan);background:rgba(34,211,238,.08);transform:scale(1.008);box-shadow:0 0 0 5px rgba(34,211,238,.07)}
+    .drop-inner{width:100%;display:flex;flex-direction:column;align-items:center;text-align:center}
+    .upload-icon{
+      width:66px;height:66px;
+      display:grid;place-items:center;
+      margin-bottom:17px;
+      border:1px solid rgba(255,255,255,.13);
+      border-radius:21px;
+      background:linear-gradient(145deg,rgba(124,92,255,.24),rgba(79,140,255,.08));
+      box-shadow:0 16px 36px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.13);
+    }
+    .upload-icon svg{width:31px;height:31px;color:#c8c0ff}
+    .hint .title{margin:0;color:#f5f7ff;font-size:16px;font-weight:800}
+    .hint .sub{max-width:360px;margin:8px auto 0;color:var(--muted);font-size:12.5px;line-height:1.75}
+    .drop-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;margin-top:19px}
+    input[type="file"]{display:none}
+    .paste-hint{display:flex;align-items:center;gap:7px;margin-top:16px;color:var(--muted-2);font-size:11px}
+    kbd{padding:3px 7px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:6px;background:rgba(255,255,255,.06);color:#cfd5e7;font-family:inherit;font-size:10px}
+
+    .dashboard{
+      display:grid;
+      grid-template-columns:minmax(0,1.4fr) minmax(320px,.6fr);
+      gap:20px;
+      align-items:start;
+    }
+    .main-column,.side-column{display:grid;gap:20px}
+    .side-column{position:sticky;top:94px}
+
+    .card{
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:var(--surface);
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+    .card-header{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      flex-wrap:wrap;
+      padding:18px 19px;
+      border-bottom:1px solid var(--line);
     }
-    .setting-label{color:var(--muted);font-size:13px}
-    .auto-clear-status{
-      margin-top:10px;
-      color:var(--muted);
-      font-size:12.5px;
-      line-height:1.7;
+    .section-title{display:flex;align-items:center;gap:11px;min-width:0}
+    .section-icon{
+      width:36px;height:36px;
+      display:grid;place-items:center;
+      flex:0 0 auto;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:rgba(255,255,255,.04);
+      color:#9db7ff;
     }
-    .auto-clear-status strong{color:var(--text)}
-    select.out{width:auto;min-width:245px;direction:rtl}
+    .section-icon svg{width:18px;height:18px}
+    .section-title h3{margin:0;font-size:15px}
+    .section-title p{margin:4px 0 0;color:var(--muted);font-size:11.5px}
+    .card-body{padding:18px}
+
+    .settings-grid{display:grid;gap:13px}
+    .setting-box{
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(255,255,255,.025);
+    }
+    .setting-label{display:block;margin-bottom:8px;color:#c9d0e2;font-size:11.5px;font-weight:700}
+    .out{
+      width:100%;
+      min-height:44px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      outline:none;
+      background:rgba(4,7,13,.5);
+      color:var(--text);
+      transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
+    }
+    .out:focus{border-color:rgba(79,140,255,.65);box-shadow:0 0 0 4px rgba(79,140,255,.1);background:rgba(5,9,17,.76)}
+    select.out{cursor:pointer;direction:rtl;color:#dde3f3}
+    option{background:#111827;color:#fff}
+    .timer-card{
+      display:flex;
+      align-items:center;
+      gap:11px;
+      padding:13px 14px;
+      border:1px solid rgba(49,213,131,.16);
+      border-radius:14px;
+      background:linear-gradient(90deg,rgba(49,213,131,.08),rgba(49,213,131,.025));
+    }
+    .timer-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;border-radius:10px;background:rgba(49,213,131,.1);color:var(--success)}
+    .timer-icon svg{width:18px;height:18px}
+    .auto-clear-status{color:var(--muted);font-size:11.5px;line-height:1.65}
+    .auto-clear-status strong{color:#c7ffe3;font-size:12.5px}
 
     .status{
       display:none;
-      margin-top:14px;
-      padding:12px 14px;
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:13px;
-      background:rgba(0,0,0,.16);
+      margin-top:13px;
+      padding:13px 14px;
+      border:1px solid rgba(79,140,255,.18);
+      border-radius:14px;
+      background:rgba(79,140,255,.06);
     }
-    .status.show{display:block}
-    .status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px}
-    .progress{height:9px;margin-top:10px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08)}
-    .bar{height:100%;width:0%;background:linear-gradient(90deg,rgba(56,189,248,.95),rgba(124,58,237,.95));transition:width .2s ease}
+    .status.show{display:block;animation:fadeUp .22s ease}
+    .status-row{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#dce4f7;font-size:11.5px}
+    .progress{height:7px;margin-top:11px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.07)}
+    .bar{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--primary),var(--primary-2),var(--cyan));transition:width .22s ease;box-shadow:0 0 16px rgba(79,140,255,.38)}
 
     .empty{
-      padding:34px 18px;
-      text-align:center;
-      color:var(--muted);
-      border:1px dashed rgba(255,255,255,.15);
-      border-radius:14px;
-    }
-    .image-list{display:grid;gap:13px}
-    .image-item{
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.14);
-      border-radius:15px;
-      padding:13px;
+      min-height:220px;
       display:grid;
-      grid-template-columns:105px minmax(0,1fr);
-      gap:14px;
+      place-items:center;
+      padding:32px 18px;
+      border:1px dashed var(--line-strong);
+      border-radius:16px;
+      color:var(--muted);
+      text-align:center;
+      background:rgba(255,255,255,.018);
     }
-    .thumb{
-      width:105px;
-      height:105px;
-      border-radius:13px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.04);
+    .empty-inner{max-width:310px}
+    .empty-icon{width:52px;height:52px;display:grid;place-items:center;margin:0 auto 13px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.035);color:#77839c}
+    .empty-icon svg{width:25px;height:25px}
+    .empty strong{display:block;margin-bottom:6px;color:#cdd4e6;font-size:13px}
+    .empty span{font-size:11.5px;line-height:1.7}
+
+    .image-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .image-item{
       overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:17px;
+      background:rgba(255,255,255,.025);
+      transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+      animation:fadeUp .25s ease both;
     }
-    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .item-main{min-width:0}
-    .item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    .item-name{margin:0;font-size:14px;word-break:break-word}
-    .item-meta{margin:5px 0 0;color:var(--muted);font-size:12px}
-    .item-number{color:rgba(56,189,248,.95);font-weight:800}
-    .item-url{margin-top:10px}
-    .item-actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .image-item:hover{transform:translateY(-3px);border-color:rgba(124,92,255,.27);box-shadow:0 16px 35px rgba(0,0,0,.22)}
+    .thumb{position:relative;height:210px;overflow:hidden;background:#090d17}
+    .thumb::after{content:"";position:absolute;inset:auto 0 0;height:48%;background:linear-gradient(transparent,rgba(4,7,13,.85));pointer-events:none}
+    .thumb img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .35s ease}
+    .image-item:hover .thumb img{transform:scale(1.035)}
+    .number-badge{position:absolute;z-index:2;top:11px;right:11px;padding:5px 8px;border:1px solid rgba(255,255,255,.17);border-radius:9px;background:rgba(4,7,13,.7);backdrop-filter:blur(10px);font-size:10px;font-weight:800}
+    .remove-icon{position:absolute;z-index:3;top:10px;left:10px;width:32px;height:32px;padding:0;border-radius:10px!important;background:rgba(5,8,15,.72)!important;backdrop-filter:blur(10px);color:#ff8b9d!important}
+    .remove-icon:hover{background:rgba(255,95,119,.18)!important}
+    .item-content{padding:14px}
+    .item-name{margin:0;overflow:hidden;color:#edf0f8;font-size:12.5px;font-weight:800;white-space:nowrap;text-overflow:ellipsis}
+    .item-meta{margin:5px 0 0;color:var(--muted-2);font-size:10.5px}
+    .url-wrap{position:relative;margin-top:12px}
+    .item-url{padding-left:39px!important;direction:ltr;text-align:left;font-size:10.5px;white-space:nowrap;text-overflow:ellipsis}
+    .url-copy-mini{position:absolute;left:5px;top:5px;width:34px;height:34px;padding:0!important;border-radius:8px!important}
+    .item-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px}
+    .item-actions .btn{min-height:38px;padding:8px 9px;font-size:10.5px}
+    .item-actions .wide{grid-column:span 2}
 
-    .out{
-      width:100%;
-      padding:11px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.2);
-      color:var(--text);
-      outline:none;
+    .group-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+    .group-toolbar .btn{min-height:42px;padding:9px 10px;font-size:10.5px}
+    .group-info{margin:0 0 9px;color:var(--muted);font-size:10.5px;line-height:1.6}
+    .code-wrap{position:relative}
+    textarea.out{min-height:260px;resize:vertical;direction:ltr;text-align:left;line-height:1.65;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:11px}
+
+    .btn{
+      appearance:none;
+      min-height:40px;
+      padding:9px 13px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:rgba(255,255,255,.045);
+      color:#dbe1ef;
+      cursor:pointer;
+      user-select:none;
+      text-decoration:none;
+      font-size:12px;
+      font-weight:780;
+      transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease,opacity .16s ease;
     }
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
-    textarea.out{min-height:210px;resize:vertical;direction:ltr;text-align:left;line-height:1.55}
-
-    .group-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}
-    .group-info{color:var(--muted);font-size:12.5px;margin:0 0 10px;line-height:1.6}
+    .btn svg{width:15px;height:15px;flex:0 0 auto}
+    .btn:hover{transform:translateY(-1px);border-color:var(--line-strong);background:rgba(255,255,255,.075)}
+    .btn:active{transform:translateY(0)}
+    .btn:disabled{opacity:.38;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn.primary{border-color:rgba(124,92,255,.38);background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 10px 24px rgba(90,87,255,.24)}
+    .btn.primary:hover{box-shadow:0 13px 30px rgba(90,87,255,.34);filter:brightness(1.05)}
+    .btn.success{border-color:rgba(49,213,131,.2);background:rgba(49,213,131,.08);color:#baffdc}
+    .btn.success:hover{border-color:rgba(49,213,131,.36);background:rgba(49,213,131,.13)}
+    .btn.danger{border-color:rgba(255,95,119,.18);background:rgba(255,95,119,.07);color:#ff9cac}
+    .btn.danger:hover{border-color:rgba(255,95,119,.34);background:rgba(255,95,119,.12)}
+    .btn.ghost{background:transparent}
+    .btn.icon-only{width:40px;padding:0}
 
     .toast{
       position:fixed;
-      left:18px;
-      right:18px;
-      bottom:18px;
-      z-index:50;
-      display:flex;
-      justify-content:center;
+      z-index:100;
+      right:20px;
+      bottom:20px;
       pointer-events:none;
     }
-    .toast > div{
+    .toast>div{
       display:none;
-      max-width:850px;
-      width:fit-content;
-      padding:11px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.72);
-      color:var(--text);
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(10px);
-      font-size:14px;
+      max-width:min(420px,calc(100vw - 40px));
+      padding:12px 15px;
+      border:1px solid var(--line-strong);
+      border-radius:13px;
+      background:rgba(15,21,35,.94);
+      color:#eef1f8;
+      box-shadow:0 18px 50px rgba(0,0,0,.4);
+      backdrop-filter:blur(18px);
+      font-size:12px;
+      line-height:1.5;
       pointer-events:auto;
+      animation:toastIn .22s ease;
     }
-    .version{text-align:center;color:var(--muted);font-size:11px;margin-top:18px}
 
-    @media (max-width:700px){
-      body{padding:14px}
-      .topbar{flex-direction:column}
-      .image-item{grid-template-columns:1fr}
-      .thumb{width:100%;height:210px}
-      .btn{flex:1 1 auto}
-      select.out{width:100%;min-width:0}
+    .footer{padding:22px 8px 8px;text-align:center;color:var(--muted-2);font-size:10.5px}
+    .footer strong{color:#959fb5;font-weight:700}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes toastIn{from{opacity:0;transform:translateY(9px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+    @media (max-width:1040px){
+      .hero{grid-template-columns:1fr;padding:26px}
+      .upload-panel{max-width:680px;width:100%;margin:auto}
+      .drop{min-height:265px}
+      .dashboard{grid-template-columns:1fr}
+      .side-column{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+
+    @media (max-width:720px){
+      body{padding:10px}
+      .app-header{top:7px;padding:10px;margin-bottom:12px;border-radius:16px}
+      .brand-copy p{display:none}
+      .brand-mark{width:40px;height:40px;border-radius:12px}
+      .counter-pill{display:none}
+      .hero{padding:20px;border-radius:20px;gap:18px}
+      .hero h2{font-size:29px}
+      .hero-copy>p{font-size:12.5px}
+      .feature-row{gap:7px}.feature-chip{padding:7px 8px;font-size:10.5px}
+      .drop{min-height:250px;padding:17px}
+      .drop-actions{width:100%;display:grid;grid-template-columns:1fr}
+      .drop-actions .btn{width:100%}
+      .side-column{grid-template-columns:1fr}
+      .image-list{grid-template-columns:1fr}
+      .thumb{height:min(64vw,310px)}
+      .card-header{padding:15px}.card-body{padding:14px}
+      .group-toolbar{grid-template-columns:1fr}
+      .toast{right:10px;bottom:10px}
+      .toast>div{max-width:calc(100vw - 20px)}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
+  <div class="app-shell">
+    <header class="app-header">
       <div class="brand">
-        <h1>AnasUpload — رفع عدة صور</h1>
-        <p>اختر عدة صور، اسحبها، أو الصقها بـ <b>Ctrl+V</b>. تُرفع الصور بالترتيب ويُنسخ الكود المجمع تلقائيًا بعد كل صورة.</p>
-      </div>
-      <button class="btn warn" id="resetBtn">♻️ مسح الكل</button>
-    </div>
-
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <h2>إضافة الصور</h2>
-          <small>يمكنك اختيار صورة واحدة أو عدة صور في المرة نفسها.</small>
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>
+          </svg>
         </div>
-        <span id="counterLabel" class="setting-label">0 صورة</span>
+        <div class="brand-copy">
+          <h1>AnasUpload</h1>
+          <p>رفع سريع، روابط مباشرة، وأكواد جاهزة للنسخ</p>
+        </div>
       </div>
-      <div class="card-body">
-        <div class="drop" id="drop" tabindex="0" aria-label="منطقة رفع الصور">
+
+      <div class="header-actions">
+        <span class="counter-pill"><span class="counter-dot"></span><span id="counterLabel">0 صورة</span></span>
+        <button class="btn danger" id="resetBtn" type="button" title="مسح جميع الصور والأكواد">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>
+          مسح الكل
+        </button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span>متعدد الصور</span> واجهة أسرع وأسهل</div>
+        <h2>ارفع صورك واحصل على <span class="gradient-text">الأكواد فورًا</span></h2>
+        <p>اختر عدة صور دفعة واحدة، اسحبها إلى منطقة الرفع، أو الصق صورة مباشرة. بعد كل رفع يتم تحديث الأكواد المجمعة ونسخ النوع الذي تختاره تلقائيًا.</p>
+        <div class="feature-row">
+          <span class="feature-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7 9 18l-5-5"/></svg>
+            رفع متعدد
+          </span>
+          <span class="feature-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+            نسخ تلقائي
+          </span>
+          <span class="feature-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            تنظيف بعد 3 دقائق
+          </span>
+        </div>
+      </div>
+
+      <div class="upload-panel">
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="اختر أو اسحب صورًا للرفع">
           <div class="drop-inner">
+            <div class="upload-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>
+            </div>
             <div class="hint">
-              <p class="title">اسحب الصور هنا، الصق صورة، أو اخترها من جهازك</p>
-              <p class="sub">بعد انتهاء الرفع اضغط «إضافة صورة أخرى» أو استخدم Ctrl+V مباشرة. يدعم اختيار عدة صور دفعة واحدة.</p>
+              <p class="title">أفلت الصور هنا للرفع</p>
+              <p class="sub">أو اختر الصور من جهازك. يمكنك رفع صورة واحدة أو عدة صور معًا.</p>
             </div>
-            <div class="actions">
-              <label class="btn primary" for="file">📁 اختيار صور</label>
-              <button class="btn good" id="addMoreBtn">➕ إضافة صورة أخرى</button>
+            <div class="drop-actions">
+              <label class="btn primary" for="file">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h5l2-2h4l2 2h5v12H3z"/><circle cx="12" cy="13" r="3"/></svg>
+                اختيار الصور
+              </label>
+              <button class="btn ghost" id="addMoreBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                إضافة صورة
+              </button>
             </div>
+            <div class="paste-hint"><span>أو الصق من الحافظة</span><kbd>Ctrl</kbd><span>+</span><kbd>V</kbd></div>
             <input type="file" id="file" accept="image/*" multiple />
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="settings">
-          <label class="setting-label" for="autoCopyMode">النسخ التلقائي بعد كل رفع:</label>
-          <select class="out" id="autoCopyMode">
-            <option value="all-return" selected>كل الصور + ارجع</option>
-            <option value="all-img">كل الصور بدون ارجع</option>
-            <option value="all-links">كل الروابط المباشرة</option>
-            <option value="full-html">HTML كامل لكل الصور</option>
-            <option value="off">إيقاف النسخ التلقائي</option>
-          </select>
-        </div>
-        <div class="auto-clear-status" id="autoClearStatus" aria-live="polite">
-          التنظيف التلقائي: ستُمسح الصور والأكواد من الصفحة بعد <strong>3 دقائق</strong> من آخر رفع ناجح.
-        </div>
-
-        <div class="status" id="statusBox" aria-live="polite">
-          <div class="status-row">
-            <span id="statusText">جارٍ الرفع...</span>
-            <span id="statusCount">0 / 0</span>
+    <main class="dashboard">
+      <div class="main-column">
+        <section class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <div class="section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+              </div>
+              <div><h3>الصور المرفوعة</h3><p>كل صورة مع رابطها وخيارات النسخ الخاصة بها</p></div>
+            </div>
           </div>
-          <div class="progress"><div class="bar" id="bar"></div></div>
-        </div>
+          <div class="card-body">
+            <div class="empty" id="emptyState">
+              <div class="empty-inner">
+                <div class="empty-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+                </div>
+                <strong>لا توجد صور حتى الآن</strong>
+                <span>ابدأ برفع صورة وستظهر هنا مع الرابط وأزرار النسخ.</span>
+              </div>
+            </div>
+            <div class="image-list" id="imageList"></div>
+          </div>
+        </section>
       </div>
-    </section>
 
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <h2>كل صورة لحالها</h2>
-          <small>نسخ الرابط، وسم الصورة، وسم الصورة مع «ارجع»، أو HTML مستقل.</small>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="empty" id="emptyState">لم تُرفع أي صورة حتى الآن.</div>
-        <div class="image-list" id="imageList"></div>
-      </div>
-    </section>
+      <aside class="side-column">
+        <section class="card">
+          <div class="card-header">
+            <div class="section-title">
+              <div class="section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><rect x="4" y="15" width="16" height="6" rx="2"/></svg>
+              </div>
+              <div><h3>إعدادات الرفع</h3><p>تحكم في الكود المنسوخ تلقائيًا</p></div>
+            </div>
+          </div>
+          <div class="card-body settings-grid">
+            <div class="setting-box">
+              <label class="setting-label" for="autoCopyMode">النسخ التلقائي بعد كل رفع</label>
+              <select class="out" id="autoCopyMode">
+                <option value="all-return" selected>كل الصور + ارجع</option>
+                <option value="all-img">كل الصور بدون ارجع</option>
+                <option value="all-links">كل الروابط المباشرة</option>
+                <option value="full-html">HTML كامل لكل الصور</option>
+                <option value="off">إيقاف النسخ التلقائي</option>
+              </select>
+            </div>
 
-    <section class="card" id="groupCard">
-      <div class="card-header">
-        <div>
-          <h2>أكواد الصور المجمعة</h2>
-          <small>الأكواد تتحدث تلقائيًا عند الإضافة أو الحذف.</small>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="group-toolbar">
-          <button class="btn good group-btn" data-group="all-links" disabled>🔗 نسخ كل الروابط</button>
-          <button class="btn good group-btn" data-group="all-img" disabled>🖼️ نسخ الكل بدون ارجع</button>
-          <button class="btn good group-btn" data-group="all-return" disabled>↩️ نسخ الكل + ارجع</button>
-          <button class="btn good group-btn" data-group="full-html" disabled>📄 نسخ HTML كامل</button>
-          <button class="btn" id="downloadHtmlBtn" disabled>⬇️ تحميل HTML</button>
-        </div>
-        <p class="group-info" id="groupInfo">سيظهر هنا آخر نوع كود تم اختياره أو نسخه.</p>
-        <textarea class="out mono" id="groupOutput" readonly placeholder="ستظهر الأكواد المجمعة هنا..."></textarea>
-      </div>
-    </section>
+            <div class="timer-card">
+              <div class="timer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 2h6"/></svg>
+              </div>
+              <div class="auto-clear-status" id="autoClearStatus" aria-live="polite">التنظيف التلقائي بعد <strong>3 دقائق</strong> من آخر رفع ناجح.</div>
+            </div>
 
-    <div class="version">v2.1 — Multi Image Upload + Auto Clear</div>
+            <div class="status" id="statusBox" aria-live="polite">
+              <div class="status-row"><span id="statusText">جارٍ الرفع...</span><span id="statusCount">0 / 0</span></div>
+              <div class="progress"><div class="bar" id="bar"></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" id="groupCard">
+          <div class="card-header">
+            <div class="section-title">
+              <div class="section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 9-3 3 3 3M16 9l3 3-3 3M14 5l-4 14"/></svg>
+              </div>
+              <div><h3>الأكواد المجمعة</h3><p>تتحدث تلقائيًا عند الإضافة أو الحذف</p></div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="group-toolbar">
+              <button class="btn success group-btn" data-group="all-links" type="button" disabled>نسخ الروابط</button>
+              <button class="btn success group-btn" data-group="all-img" type="button" disabled>بدون ارجع</button>
+              <button class="btn success group-btn" data-group="all-return" type="button" disabled>مع ارجع</button>
+              <button class="btn success group-btn" data-group="full-html" type="button" disabled>HTML كامل</button>
+              <button class="btn ghost" id="downloadHtmlBtn" type="button" disabled style="grid-column:1/-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                تحميل ملف HTML
+              </button>
+            </div>
+            <p class="group-info" id="groupInfo">سيظهر هنا آخر نوع كود تم اختياره أو نسخه.</p>
+            <div class="code-wrap"><textarea class="out" id="groupOutput" readonly placeholder="ستظهر الأكواد المجمعة هنا..."></textarea></div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="footer"><strong>AnasUpload v3.0</strong> — واجهة حديثة، رفع متعدد، نسخ تلقائي، وتنظيف بعد 3 دقائق</footer>
   </div>
 
   <div class="toast"><div id="toast"></div></div>
@@ -364,13 +639,18 @@
   let autoClearCountdown = null;
   let autoClearDeadline = 0;
 
+  const icons = {
+    copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>',
+    code:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 9-3 3 3 3M16 9l3 3-3 3M14 5l-4 14"/></svg>',
+    external:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>',
+    trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6"/></svg>'
+  };
+
   function toast(message){
     toastEl.textContent = message;
     toastEl.style.display = 'block';
     clearTimeout(toastEl._timer);
-    toastEl._timer = setTimeout(() => {
-      toastEl.style.display = 'none';
-    }, 3000);
+    toastEl._timer = setTimeout(() => { toastEl.style.display = 'none'; }, 3000);
   }
 
   function formatRemainingTime(milliseconds){
@@ -382,7 +662,7 @@
 
   function updateAutoClearStatus(){
     if (!images.length || !autoClearDeadline){
-      autoClearStatus.innerHTML = 'التنظيف التلقائي: ستُمسح الصور والأكواد من الصفحة بعد <strong>3 دقائق</strong> من آخر رفع ناجح.';
+      autoClearStatus.innerHTML = 'التنظيف التلقائي بعد <strong>3 دقائق</strong> من آخر رفع ناجح.';
       return;
     }
 
@@ -392,7 +672,7 @@
       return;
     }
 
-    autoClearStatus.innerHTML = `سيتم مسح الصور والأكواد تلقائيًا بعد <strong>${formatRemainingTime(remaining)}</strong>`;
+    autoClearStatus.innerHTML = `سيتم المسح تلقائيًا بعد <strong>${formatRemainingTime(remaining)}</strong>`;
   }
 
   function cancelAutoClearTimer(resetStatus = true){
@@ -414,18 +694,12 @@
     cancelAutoClearTimer(false);
     renderAll();
     updateAutoClearStatus();
-    toast(automatic
-      ? 'انتهت 3 دقائق — تم مسح الصور والأكواد تلقائيًا'
-      : 'تم مسح جميع الصور والأكواد');
+    toast(automatic ? 'انتهت 3 دقائق — تم مسح الصور والأكواد تلقائيًا' : 'تم مسح جميع الصور والأكواد');
   }
 
   function scheduleAutoClear(){
     cancelAutoClearTimer(false);
-    if (!images.length){
-      updateAutoClearStatus();
-      return;
-    }
-
+    if (!images.length){ updateAutoClearStatus(); return; }
     autoClearDeadline = Date.now() + AUTO_CLEAR_DELAY;
     updateAutoClearStatus();
     autoClearCountdown = setInterval(updateAutoClearStatus, 1000);
@@ -437,10 +711,7 @@
     const units = ['B','KB','MB','GB'];
     let value = bytes;
     let unitIndex = 0;
-    while (value >= 1024 && unitIndex < units.length - 1){
-      value /= 1024;
-      unitIndex++;
-    }
+    while (value >= 1024 && unitIndex < units.length - 1){ value /= 1024; unitIndex++; }
     return `${value.toFixed(unitIndex === 0 ? 0 : 2)} ${units[unitIndex]}`;
   }
 
@@ -454,19 +725,11 @@
   }
 
   function safeAltName(fileName){
-    return String(fileName || 'صورة مرفوعة')
-      .replace(/\.[^.]+$/, '')
-      .replace(/["<>]/g, '')
-      .trim() || 'صورة مرفوعة';
+    return String(fileName || 'صورة مرفوعة').replace(/\.[^.]+$/, '').replace(/["<>]/g, '').trim() || 'صورة مرفوعة';
   }
 
-  function imageTag(image){
-    return `<img src="${image.directUrl}" alt="${safeAltName(image.fileName)}" />`;
-  }
-
-  function imageWithReturn(image){
-    return `${imageTag(image)}\n<div>ارجع</div>`;
-  }
+  function imageTag(image){ return `<img src="${image.directUrl}" alt="${safeAltName(image.fileName)}" />`; }
+  function imageWithReturn(image){ return `${imageTag(image)}\n<div>ارجع</div>`; }
 
   function singleImageHtml(image){
     return `<!doctype html>
@@ -488,19 +751,9 @@
 
   function getGroupCode(mode){
     if (!images.length) return '';
-
-    if (mode === 'all-links'){
-      return images.map(image => image.directUrl).join('\n');
-    }
-
-    if (mode === 'all-img'){
-      return images.map(imageTag).join('\n');
-    }
-
-    if (mode === 'all-return'){
-      return images.map(imageWithReturn).join('\n');
-    }
-
+    if (mode === 'all-links') return images.map(image => image.directUrl).join('\n');
+    if (mode === 'all-img') return images.map(imageTag).join('\n');
+    if (mode === 'all-return') return images.map(imageWithReturn).join('\n');
     if (mode === 'full-html'){
       const tags = images.map(image => `  ${imageTag(image)}`).join('\n');
       return `<!doctype html>
@@ -519,7 +772,6 @@ ${tags}
 </body>
 </html>`;
     }
-
     return '';
   }
 
@@ -535,7 +787,6 @@ ${tags}
 
   async function copyText(text, successMessage = 'تم النسخ ✅'){
     if (!text) return false;
-
     try{
       if (navigator.clipboard && window.isSecureContext){
         await navigator.clipboard.writeText(text);
@@ -574,15 +825,9 @@ ${tags}
     const form = new FormData();
     form.append('image', base64);
 
-    const response = await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(API_KEY)}`, {
-      method:'POST',
-      body:form
-    });
-
+    const response = await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(API_KEY)}`, { method:'POST', body:form });
     const data = await response.json();
-    if (!response.ok || !data || !data.success){
-      throw new Error(data?.error?.message || 'فشل رفع الصورة');
-    }
+    if (!response.ok || !data || !data.success) throw new Error(data?.error?.message || 'فشل رفع الصورة');
 
     return {
       id: (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`),
@@ -596,14 +841,8 @@ ${tags}
 
   async function processFiles(fileList){
     const files = [...fileList].filter(file => file.type && file.type.startsWith('image/'));
-    if (!files.length){
-      toast('اختر ملفات صور فقط');
-      return;
-    }
-    if (isUploading){
-      toast('انتظر حتى ينتهي الرفع الحالي');
-      return;
-    }
+    if (!files.length){ toast('اختر ملفات صور فقط'); return; }
+    if (isUploading){ toast('انتظر حتى ينتهي الرفع الحالي'); return; }
 
     isUploading = true;
     cancelAutoClearTimer(false);
@@ -648,10 +887,7 @@ ${tags}
     statusText.textContent = failed ? `اكتمل: ${uploaded} ناجحة، ${failed} فاشلة` : `تم رفع ${uploaded} صورة بنجاح`;
     statusCount.textContent = `${files.length} / ${files.length}`;
 
-    setTimeout(() => {
-      statusBox.classList.remove('show');
-      bar.style.width = '0%';
-    }, 1300);
+    setTimeout(() => { statusBox.classList.remove('show'); bar.style.width = '0%'; }, 1400);
 
     isUploading = false;
     fileInput.disabled = false;
@@ -665,33 +901,30 @@ ${tags}
   function updateGroupOutput(mode = currentGroupMode){
     currentGroupMode = mode;
     groupOutput.value = getGroupCode(mode);
-    groupInfo.textContent = images.length
-      ? `${modeLabel(mode)} — عدد الصور: ${images.length}`
-      : 'سيظهر هنا آخر نوع كود تم اختياره أو نسخه.';
+    groupInfo.textContent = images.length ? `${modeLabel(mode)} — عدد الصور: ${images.length}` : 'سيظهر هنا آخر نوع كود تم اختياره أو نسخه.';
   }
 
   function renderImageList(){
-    emptyState.style.display = images.length ? 'none' : 'block';
+    emptyState.style.display = images.length ? 'none' : 'grid';
     imageList.innerHTML = images.map((image, index) => `
-      <article class="image-item" data-id="${image.id}">
+      <article class="image-item" data-id="${image.id}" style="animation-delay:${Math.min(index * 35, 210)}ms">
         <div class="thumb">
           <img src="${escapeHtml(image.thumbUrl)}" alt="معاينة ${index + 1}" loading="lazy" />
+          <span class="number-badge">#${index + 1}</span>
+          <button class="btn icon-only remove-icon" data-action="remove" data-id="${image.id}" type="button" title="حذف الصورة">${icons.trash}</button>
         </div>
-        <div class="item-main">
-          <div class="item-head">
-            <div>
-              <p class="item-name"><span class="item-number">#${index + 1}</span> — ${escapeHtml(image.fileName)}</p>
-              <p class="item-meta">${escapeHtml(image.fileType)} • ${formatBytes(image.fileSize)}</p>
-            </div>
-            <button class="btn warn" data-action="remove" data-id="${image.id}">🗑️ حذف</button>
+        <div class="item-content">
+          <p class="item-name" title="${escapeHtml(image.fileName)}">${escapeHtml(image.fileName)}</p>
+          <p class="item-meta">${escapeHtml(image.fileType)} · ${formatBytes(image.fileSize)}</p>
+          <div class="url-wrap">
+            <input class="out item-url" value="${escapeHtml(image.directUrl)}" readonly aria-label="الرابط المباشر للصورة ${index + 1}" />
+            <button class="btn icon-only url-copy-mini" data-action="copy-link" data-id="${image.id}" type="button" title="نسخ الرابط">${icons.copy}</button>
           </div>
-          <input class="out mono item-url" value="${escapeHtml(image.directUrl)}" readonly />
           <div class="item-actions">
-            <button class="btn good" data-action="copy-link" data-id="${image.id}">🔗 الرابط</button>
-            <button class="btn good" data-action="copy-img" data-id="${image.id}">🖼️ بدون ارجع</button>
-            <button class="btn good" data-action="copy-return" data-id="${image.id}">↩️ مع ارجع</button>
-            <button class="btn good" data-action="copy-html" data-id="${image.id}">📄 HTML</button>
-            <button class="btn" data-action="open" data-id="${image.id}">🌐 فتح</button>
+            <button class="btn success" data-action="copy-img" data-id="${image.id}" type="button">${icons.code} بدون ارجع</button>
+            <button class="btn success" data-action="copy-return" data-id="${image.id}" type="button">${icons.code} مع ارجع</button>
+            <button class="btn ghost" data-action="copy-html" data-id="${image.id}" type="button">${icons.copy} HTML</button>
+            <button class="btn ghost" data-action="open" data-id="${image.id}" type="button">${icons.external} فتح الصورة</button>
           </div>
         </div>
       </article>
@@ -706,14 +939,11 @@ ${tags}
     updateGroupOutput(currentGroupMode);
   }
 
-  function findImage(id){
-    return images.find(image => image.id === id);
-  }
+  function findImage(id){ return images.find(image => image.id === id); }
 
   imageList.addEventListener('click', async event => {
     const button = event.target.closest('button[data-action]');
     if (!button) return;
-
     const image = findImage(button.dataset.id);
     if (!image) return;
 
@@ -729,6 +959,7 @@ ${tags}
         images.splice(index, 1);
         renderAll();
         if (!images.length) cancelAutoClearTimer();
+        else scheduleAutoClear();
         toast('تم حذف الصورة من القائمة');
       }
     }
@@ -757,11 +988,8 @@ ${tags}
     setTimeout(() => URL.revokeObjectURL(url), 1500);
   });
 
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files?.length) processFiles(fileInput.files);
-  });
-
-  addMoreBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => { if (fileInput.files?.length) processFiles(fileInput.files); });
+  addMoreBtn.addEventListener('click', event => { event.stopPropagation(); fileInput.click(); });
 
   ['dragenter','dragover'].forEach(eventName => {
     drop.addEventListener(eventName, event => {
@@ -779,9 +1007,7 @@ ${tags}
     });
   });
 
-  drop.addEventListener('drop', event => {
-    if (event.dataTransfer?.files?.length) processFiles(event.dataTransfer.files);
-  });
+  drop.addEventListener('drop', event => { if (event.dataTransfer?.files?.length) processFiles(event.dataTransfer.files); });
 
   document.addEventListener('paste', event => {
     if (isUploading) return;
@@ -791,22 +1017,24 @@ ${tags}
         const blob = item.getAsFile();
         if (blob){
           const extension = (blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
-          files.push(new File([blob], `pasted-image-${pastedImageNumber++}.${extension}`, {
-            type:blob.type || 'image/png'
-          }));
+          files.push(new File([blob], `pasted-image-${pastedImageNumber++}.${extension}`, { type:blob.type || 'image/png' }));
         }
       }
     }
-    if (files.length){
-      event.preventDefault();
-      processFiles(files);
-    }
+    if (files.length){ event.preventDefault(); processFiles(files); }
   });
 
   resetBtn.addEventListener('click', () => clearUploadedData());
 
   drop.addEventListener('click', event => {
-    if (!event.target.closest('button,label,select')) drop.focus();
+    if (!event.target.closest('button,label,input')) fileInput.click();
+  });
+
+  drop.addEventListener('keydown', event => {
+    if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('button,label')){
+      event.preventDefault();
+      fileInput.click();
+    }
   });
 
   renderAll();

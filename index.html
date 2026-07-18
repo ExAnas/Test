@@ -131,6 +131,13 @@
       flex-wrap:wrap;
     }
     .setting-label{color:var(--muted);font-size:13px}
+    .auto-clear-status{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12.5px;
+      line-height:1.7;
+    }
+    .auto-clear-status strong{color:var(--text)}
     select.out{width:auto;min-width:245px;direction:rtl}
 
     .status{
@@ -274,6 +281,9 @@
             <option value="off">إيقاف النسخ التلقائي</option>
           </select>
         </div>
+        <div class="auto-clear-status" id="autoClearStatus" aria-live="polite">
+          التنظيف التلقائي: ستُمسح الصور والأكواد من الصفحة بعد <strong>3 دقائق</strong> من آخر رفع ناجح.
+        </div>
 
         <div class="status" id="statusBox" aria-live="polite">
           <div class="status-row">
@@ -318,7 +328,7 @@
       </div>
     </section>
 
-    <div class="version">v2.0 — Multi Image Upload</div>
+    <div class="version">v2.1 — Multi Image Upload + Auto Clear</div>
   </div>
 
   <div class="toast"><div id="toast"></div></div>
@@ -343,11 +353,16 @@
   const downloadHtmlBtn = document.getElementById('downloadHtmlBtn');
   const groupButtons = [...document.querySelectorAll('.group-btn')];
   const toastEl = document.getElementById('toast');
+  const autoClearStatus = document.getElementById('autoClearStatus');
 
+  const AUTO_CLEAR_DELAY = 3 * 60 * 1000;
   const images = [];
   let isUploading = false;
   let currentGroupMode = 'all-return';
   let pastedImageNumber = 1;
+  let autoClearTimer = null;
+  let autoClearCountdown = null;
+  let autoClearDeadline = 0;
 
   function toast(message){
     toastEl.textContent = message;
@@ -356,6 +371,65 @@
     toastEl._timer = setTimeout(() => {
       toastEl.style.display = 'none';
     }, 3000);
+  }
+
+  function formatRemainingTime(milliseconds){
+    const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  function updateAutoClearStatus(){
+    if (!images.length || !autoClearDeadline){
+      autoClearStatus.innerHTML = 'التنظيف التلقائي: ستُمسح الصور والأكواد من الصفحة بعد <strong>3 دقائق</strong> من آخر رفع ناجح.';
+      return;
+    }
+
+    const remaining = autoClearDeadline - Date.now();
+    if (remaining <= 0){
+      autoClearStatus.innerHTML = 'جارٍ تنظيف الصور والأكواد...';
+      return;
+    }
+
+    autoClearStatus.innerHTML = `سيتم مسح الصور والأكواد تلقائيًا بعد <strong>${formatRemainingTime(remaining)}</strong>`;
+  }
+
+  function cancelAutoClearTimer(resetStatus = true){
+    clearTimeout(autoClearTimer);
+    clearInterval(autoClearCountdown);
+    autoClearTimer = null;
+    autoClearCountdown = null;
+    autoClearDeadline = 0;
+    if (resetStatus) updateAutoClearStatus();
+  }
+
+  function clearUploadedData({automatic = false} = {}){
+    images.length = 0;
+    fileInput.value = '';
+    currentGroupMode = 'all-return';
+    pastedImageNumber = 1;
+    statusBox.classList.remove('show');
+    bar.style.width = '0%';
+    cancelAutoClearTimer(false);
+    renderAll();
+    updateAutoClearStatus();
+    toast(automatic
+      ? 'انتهت 3 دقائق — تم مسح الصور والأكواد تلقائيًا'
+      : 'تم مسح جميع الصور والأكواد');
+  }
+
+  function scheduleAutoClear(){
+    cancelAutoClearTimer(false);
+    if (!images.length){
+      updateAutoClearStatus();
+      return;
+    }
+
+    autoClearDeadline = Date.now() + AUTO_CLEAR_DELAY;
+    updateAutoClearStatus();
+    autoClearCountdown = setInterval(updateAutoClearStatus, 1000);
+    autoClearTimer = setTimeout(() => clearUploadedData({automatic:true}), AUTO_CLEAR_DELAY);
   }
 
   function formatBytes(bytes){
@@ -532,6 +606,7 @@ ${tags}
     }
 
     isUploading = true;
+    cancelAutoClearTimer(false);
     fileInput.disabled = true;
     addMoreBtn.disabled = true;
     statusBox.classList.add('show');
@@ -582,6 +657,9 @@ ${tags}
     fileInput.disabled = false;
     addMoreBtn.disabled = false;
     fileInput.value = '';
+
+    if (images.length) scheduleAutoClear();
+    else updateAutoClearStatus();
   }
 
   function updateGroupOutput(mode = currentGroupMode){
@@ -650,6 +728,7 @@ ${tags}
       if (index !== -1){
         images.splice(index, 1);
         renderAll();
+        if (!images.length) cancelAutoClearTimer();
         toast('تم حذف الصورة من القائمة');
       }
     }
@@ -724,19 +803,14 @@ ${tags}
     }
   });
 
-  resetBtn.addEventListener('click', () => {
-    images.length = 0;
-    fileInput.value = '';
-    currentGroupMode = 'all-return';
-    renderAll();
-    toast('تم مسح جميع الصور والأكواد');
-  });
+  resetBtn.addEventListener('click', () => clearUploadedData());
 
   drop.addEventListener('click', event => {
     if (!event.target.closest('button,label,select')) drop.focus();
   });
 
   renderAll();
+  updateAutoClearStatus();
 </script>
 </body>
 </html>
